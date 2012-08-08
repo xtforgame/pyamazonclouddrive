@@ -24,8 +24,8 @@
 # The Software shall be used for Younger than you, not Older.
 # 
 """
-administrator@Tualatin ~/svn/pyacd $ ./acdget.py --help
-Usage: acdget.py [Options] file1 file2 - ...('-' means STDIN)
+administrator@Tualatin ~/svn/pyacd $ ./acdlist.py --help
+Usage: acdlist.py [Options] path1 path2 - ...('-' means STDIN)
 
 Options:
   --version             show program's version number and exit
@@ -36,26 +36,28 @@ Options:
                         password for Amazon.com
   -s FILE, --session=FILE
                         save or load login session to/from FILE
-  -d PATH, --destination=PATH
-                        download path [default: ./]
-  -f, --force           override local file if it has same name [default:
-                        False]
+  -l                    use a long listing format
+  -t TYPE, --type=TYPE  list type (ALL|FILE|FOLDER) [default: ALL]
   -v, --verbose         show debug infomation
   -q, --quiet           quiet mode
 
-This command download file(s) from your Amazon Cloud Drive. If there is same
-named file, downloading is canceled automatically. (or use --force option)
+This command lists files and directories of your Amazon Cloud Drive.
 
-administrator@Tualatin ~/svn/pyacd $ ./acdget.py -s ~/.session README.TXT
+administrator@Tualatin ~/svn/pyacd $ ./acdlist.py -s ~/.session / -l
 Logining to Amazon.com ... Done
 Updating /home/administrator/.session ... Done
-Downloading /README.TXT to ./ ... Done
+Listing / ... Done
+total 2 (/)
+==modified========== ==size/type== ==version== ==name==========
+2011-04-24T23:06:00         121266         (5) test.jpg
+2011-04-24T23:06:15         116236         (3) test (2).jpg
 """
 
 import sys
 import os
 from optparse import OptionParser
 import pickle
+import time,datetime
 
 pyacd_lib_dir=os.path.dirname(os.__file__)+os.sep+"pyacd"
 if os.path.exists(pyacd_lib_dir) and os.path.isdir(pyacd_lib_dir):
@@ -63,10 +65,9 @@ if os.path.exists(pyacd_lib_dir) and os.path.isdir(pyacd_lib_dir):
 
 import pyacd
 
-parser=OptionParser(epilog="This command download file(s) from your Amazon Cloud Drive. "+
-                            "If there is same named file, downloading is canceled "+
-                            "automatically. (or use --force option)",
-                    usage="%prog [Options] file1 file2 - ...('-' means STDIN)",version="%prog 0.2")
+parser=OptionParser(epilog="This command lists files and directories of "
+                           "your Amazon Cloud Drive. ",
+                    usage="%prog [Options] path1 path2 - ...('-' means STDIN)",version="%prog 0.2")
 
 parser.add_option("-e","--email",dest="email",action="store",default=None,
                   help="email address for Amazon.com")
@@ -74,10 +75,10 @@ parser.add_option("-p","--password",dest="password",action="store",default=None,
                   help="password for Amazon.com")
 parser.add_option("-s","--session",dest="session",action="store",default=None,
                   metavar="FILE",help="save or load login session to/from FILE")
-parser.add_option("-d","--destination",dest="path",action="store",default="."+os.sep,
-                  help="download path [default: %default]")
-parser.add_option("-f","--force",dest="force",action="store_true",default=False,
-                  help="override local file if it has same name [default: %default]")
+parser.add_option("-l",dest="long_format",action="store_true",default=False,
+                  help="use a long listing format")
+parser.add_option("-t","--type",dest="list_type",action="store",default="ALL",
+                  metavar="TYPE",help="list type (ALL|FILE|FOLDER) [default: %default]")
 parser.add_option("-v","--verbose",dest="verbose",action="store_true",default=False,
                   help="show debug infomation")
 parser.add_option("-q","--quiet",dest="quiet",action="store_true",default=False,
@@ -100,21 +101,9 @@ def main():
     args += [x.strip() for x in sys.stdin.readlines()]
 
   if 0==len(args):
-    sys.stderr.write("!! no file selected !!\n")
-    parser.print_help()
-    sys.exit(2)
+    args.append("/")
   else:
     pass
-    
-  # Check destination
-  path=opts.path
-  if path[-1]!=os.sep:path=path+os.sep
-  if not os.path.exists(path):
-    sys.stderr.write('"%s" does not exist\n'%path)
-    sys.exit(2)
-  elif not os.path.isdir(path):
-    sys.stderr.write('"%s" is not file\n'%path)
-    sys.exit(2)
 
   # Login to Amazon.com
   session=None
@@ -138,13 +127,13 @@ def main():
   elif not session.is_valid():
     sys.stderr.write("Session is invalid.\n%s\n"%session)
     sys.exit(2)
-  elif not session.is_logined():
+  elif not session.is_logged_in():
     sys.stderr.write("Login failed.\n%s\n"%session)
     sys.exit(2)
 
   if not opts.quiet:
     sys.stderr.write("Done\n")
-    
+
   if opts.session:
     if not opts.quiet:
       sys.stderr.write("Updating %s ... "%opts.session)
@@ -155,44 +144,56 @@ def main():
     if not opts.quiet:
       sys.stderr.write("Done\n")
 
-  for file in args:
-    if file[0]!='/':file='/'+file
-    filename = os.path.basename(file)
+  for path in args:
+    if path[0]!='/':path='/'+path
 
     if not opts.quiet:
-      sys.stderr.write("Downloading %s to %s ... "%(file,path))
+      sys.stderr.write("Listing %s ... "%(path))
 
-    if os.path.exists(path+filename) and not opts.force:
-      sys.stderr.write("Aborted. ('%s' exists.)\n"%(path+filename))
-      continue
-
-    # get file
+    # get path
     if opts.verbose:
       sys.stderr.write("get ")
     try:
-      fileobj = pyacd.api.get_info_by_path(file)
+      pathobj = pyacd.api.get_info_by_path(path)
     except pyacd.PyAmazonCloudDriveApiException,e:
       sys.stderr.write("Aborted. ('%s')\n"%e.message)
       continue
     if opts.verbose:
       sys.stderr.write("-> ")
 
-    if fileobj.Type!= pyacd.types.FILE:
-      sys.stderr.write("Aborted. ('%s' is not file.)"%file)
-      continue
-
-    # download
-    data=pyacd.api.download_by_id(fileobj.object_id)
-    
-
-    f=open(path+filename,"wb")
-    f.truncate()
-    f.write(data)
-    f.close()
+    obj=[]
+    if pathobj.Type== pyacd.types.FILE:
+      obj.append(pathobj)
+    else:
+      if opts.verbose:
+        sys.stderr.write("info ")
+      info = pyacd.api.list_by_id(pathobj.object_id)
+      if opts.verbose:
+        sys.stderr.write("-> ")
+      obj+=info.objects
 
     if not opts.quiet:
       sys.stderr.write("Done\n")
 
+    #print obj
+    if opts.long_format:
+      print "total %s (%s)"%(len(obj),path)
+      print "==modified========== ==size/type== ==version== ==name=========="
+    for o in obj:
+      if opts.list_type!="ALL" and opts.list_type!=o.Type:
+        continue
+      if opts.long_format:
+        print "%s "%datetime.datetime(*time.localtime(o.modified)[:-3]).isoformat(),
+        if o.Type == pyacd.types.FILE:
+          print "%13s"%(o.size if o.size else -1),
+        else:
+          print "%13s"%("<"+o.Type+">"),
+
+        print "%11s"%("("+str(o.version)+")"),
+
+      print o.name if o.Type == pyacd.types.FILE else o.name+"/"
+
+    continue
 
 if __name__=="__main__":
   main()

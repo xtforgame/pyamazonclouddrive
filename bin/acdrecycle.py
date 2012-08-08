@@ -24,8 +24,8 @@
 # The Software shall be used for Younger than you, not Older.
 # 
 """
-administrator@Tualatin ~/svn/pyacd $ ./acdmkdir.py --help
-Usage: acdmkdir.py [Options] dir1 dir2 - ...('-' means STDIN)
+administrator@Tualatin ~/svn/pyacd $ ./acdrecycle.py --help
+Usage: acdrecycle.py [Options] path1 path2 - ...('-' means STDIN)
 
 Options:
   --version             show program's version number and exit
@@ -39,13 +39,12 @@ Options:
   -v, --verbose         show debug infomation
   -q, --quiet           quiet mode
 
-This command makes dir(s) in your Amazon Cloud Drive. If there is same named
-dir, making dir is aborted automatically.
+This command move file(s) or dir(s) to Recycle of your Amazon Cloud Drive.
 
-administrator@Tualatin ~/svn/pyacd $ ./acdmkdir.py -s ~/.session testdir
+administrator@Tualatin ~/svn/pyacd $ ./acdrecycle.py -s ~/.session README.TXT
 Logining to Amazon.com ... Done
-Updating /home/administratora/.session ... Done
-Making testdir in / ... Done
+Updating /home/administrator/.session ... Done
+Moving /README.TXT to Recycle ... Done
 """
 
 import sys
@@ -59,10 +58,9 @@ if os.path.exists(pyacd_lib_dir) and os.path.isdir(pyacd_lib_dir):
 
 import pyacd
 
-parser=OptionParser(epilog="This command makes dir(s) in your Amazon Cloud Drive. "+
-                            "If there is same named dir, making dir is aborted "+
-                            "automatically.",
-                    usage="%prog [Options] dir1 dir2 - ...('-' means STDIN)",version="%prog 0.2")
+parser=OptionParser(epilog="This command move file(s) or dir(s) to Recycle "+
+                           "of your Amazon Cloud Drive. ",
+                    usage="%prog [Options] path1 path2 - ...('-' means STDIN)",version="%prog 0.2")
 
 parser.add_option("-e","--email",dest="email",action="store",default=None,
                   help="email address for Amazon.com")
@@ -92,12 +90,12 @@ def main():
     args += [x.strip() for x in sys.stdin.readlines()]
 
   if 0==len(args):
-    sys.stderr.write("!! no dir selected !!\n")
+    sys.stderr.write("!! no path selected !!\n")
     parser.print_help()
     sys.exit(2)
   else:
     pass
-
+    
   # Login to Amazon.com
   session=None
   try:
@@ -120,13 +118,13 @@ def main():
   elif not session.is_valid():
     sys.stderr.write("Session is invalid.\n%s\n"%session)
     sys.exit(2)
-  elif not session.is_logined():
+  elif not session.is_logged_in():
     sys.stderr.write("Login failed.\n%s\n"%session)
     sys.exit(2)
 
   if not opts.quiet:
     sys.stderr.write("Done\n")
-
+    
   if opts.session:
     if not opts.quiet:
       sys.stderr.write("Updating %s ... "%opts.session)
@@ -139,21 +137,29 @@ def main():
 
   for path in args:
     if path[0]!='/':path='/'+path
-    folder = path.split("/")[-1]
-    parent = "/".join(path.split("/")[:-1])
-    parent = parent if len(parent)!=0 else "/"
 
     if not opts.quiet:
-      sys.stderr.write("Making %s in %s ... "%(folder,parent))
+      sys.stderr.write("Moving %s to Recycle ... "%(path))
 
-    # create folder
+    # get path
     if opts.verbose:
-      sys.stderr.write("create ")
+      sys.stderr.write("get ")
     try:
-      pyacd.api.create_by_path(parent,folder,Type=pyacd.types.FOLDER)
+      pathobj = pyacd.api.get_info_by_path(path)
     except pyacd.PyAmazonCloudDriveApiException,e:
       sys.stderr.write("Aborted. ('%s')\n"%e.message)
       continue
+    if opts.verbose:
+      sys.stderr.write("-> ")
+
+    if pathobj.Type!= pyacd.types.FILE and pathobj.Type!= pyacd.types.FOLDER :
+      sys.stderr.write("Aborted. ('%s<%s>' is special entity.)"%(path,pathobj.Type))
+      continue
+
+    # move
+    if opts.verbose:
+      sys.stderr.write("move ")
+    pyacd.api.recycle_bulk_by_id([pathobj.object_id,])
     if opts.verbose:
       sys.stderr.write("-> ")
 

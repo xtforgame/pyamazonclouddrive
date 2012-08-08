@@ -132,7 +132,7 @@ class Session(object):
                     self.cookies.has_key("session-id-time") and \
                          self.cookies.has_key("ubid-main")
 
-  def is_logined(self):
+  def is_logged_in(self):
     return (self.is_valid() and self.username and self.customer_id)
 
   def update_cookies(self,cookie_str):
