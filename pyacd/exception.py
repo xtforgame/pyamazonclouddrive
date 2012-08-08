@@ -31,10 +31,10 @@ class PyAmazonCloudDriveError(StandardError):
     self.reason = reason
 
   def __repr__(self):
-    return 'PyAmazonCloudDriveError: %s' % self.reason
+    return u'PyAmazonCloudDriveError: ' + self.reason.encode('utf8')
 
   def __str__(self):
-    return 'PyAmazonCloudDriveError: %s' % self.reason
+    return u'PyAmazonCloudDriveError: ' + self.reason.encode('utf8')
 
 class PyAmazonCloudDriveApiException(PyAmazonCloudDriveError):
   """server returns error code and message"""
