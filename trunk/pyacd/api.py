@@ -74,7 +74,7 @@ except ImportError,e:
   import simplejson as json
 
 import pyacd
-from apiresponse import *
+from .apiresponse import *
 
 
 def _error_check(resp_json):
@@ -110,7 +110,7 @@ def complete_file_upload_by_id(object_id,storage_key):
   :param storage_key: upload_url.storage_key
   """
   session = pyacd.get_session()
-  if not session.is_logined():
+  if not session.is_logged_in():
     raise pyacd.PyAmazonCloudDriveError("Not logined %s"%session)
 
   operation="completeFileUploadById"
@@ -133,7 +133,7 @@ def can_device_download():
   :return: whether downloading is allowed.
   """
   session = pyacd.get_session()
-  if not session.is_logined():
+  if not session.is_logged_in():
     raise pyacd.PyAmazonCloudDriveError("Not logined %s"%session)
 
   operation="canDeviceDownload"
@@ -168,7 +168,7 @@ def get_upload_url_by_id(object_id,size,method="POST"):
   :return: informations of uploading.
   """
   session = pyacd.get_session()
-  if not session.is_logined():
+  if not session.is_logged_in():
     raise pyacd.PyAmazonCloudDriveError("Not logined %s"%session)
 
   operation="getUploadUrlById"
@@ -201,7 +201,7 @@ def download_by_id(object_id,attachment=0):
   :return: data stored in S3
   """
   session = pyacd.get_session()
-  if not session.is_logined():
+  if not session.is_logged_in():
     raise pyacd.PyAmazonCloudDriveError("Not logined %s"%session)
 
   if not can_device_download():
@@ -228,7 +228,7 @@ def empty_recycle_bin():
   """Empty out "/RecycleBin".
   """
   session = pyacd.get_session()
-  if not session.is_logined():
+  if not session.is_logged_in():
     raise pyacd.PyAmazonCloudDriveError("Not logined %s"%session)
 
   operation="emptyRecycleBin"
@@ -260,7 +260,7 @@ def remove_bulk_by_id(source_inclusion_ids=[]):
 
 def _operate2_bulk_by_id(operation,source_inclusion_ids):
   session = pyacd.get_session()
-  if not session.is_logined():
+  if not session.is_logged_in():
     raise pyacd.PyAmazonCloudDriveError("Not logined %s"%session)
 
   if len(source_inclusion_ids)==0:
@@ -279,7 +279,7 @@ def _operate2_bulk_by_id(operation,source_inclusion_ids):
     
 def _operate1_bulk_by_id(operation,destination_parent_id,source_inclusion_ids,conflict_resolution):
   session = pyacd.get_session()
-  if not session.is_logined():
+  if not session.is_logged_in():
     raise pyacd.PyAmazonCloudDriveError("Not logined %s"%session)
 
   if len(source_inclusion_ids)==0:
@@ -341,7 +341,7 @@ def move_by_id(source_id,destination_parent_id,destination_name,overwrite=False)
   :param overwrite: whether override or not.
   """
   session = pyacd.get_session()
-  if not session.is_logined():
+  if not session.is_logged_in():
     raise pyacd.PyAmazonCloudDriveError("Not logined %s"%session)
 
   operation="moveById"
@@ -385,7 +385,7 @@ def create_by_path(path,name,Type=pyacd.types.FILE,conflict_resolution="RENAME",
   :return: information of created one.
   """
   session = pyacd.get_session()
-  if not session.is_logined():
+  if not session.is_logged_in():
     raise pyacd.PyAmazonCloudDriveError("Not logined %s"%session)
 
   operation="createByPath"
@@ -426,7 +426,7 @@ def create_by_id(parent_id,name,Type=pyacd.types.FOLDER,overwrite=False):
   :return: information of created one.
   """
   session = pyacd.get_session()
-  if not session.is_logined():
+  if not session.is_logged_in():
     raise pyacd.PyAmazonCloudDriveError("Not logined %s"%session)
 
   operation="createById"
@@ -473,7 +473,7 @@ def list_by_id(object_id,ordering=None,next_token=0,max_items=None,Filter=None):
   :return: informations listed.
   """
   session = pyacd.get_session()
-  if not session.is_logined():
+  if not session.is_logged_in():
     raise pyacd.PyAmazonCloudDriveError("Not logined %s"%session)
 
   operation="listById"
@@ -512,7 +512,7 @@ def select_metadata(query):
   :return: informations selected.
   """
   session = pyacd.get_session()
-  if not session.is_logined():
+  if not session.is_logged_in():
     raise pyacd.PyAmazonCloudDriveError("Not logined %s"%session)
 
   operation="selectMetadata"
@@ -540,7 +540,7 @@ def get_info_by_path(path):
   :return: information.
   """
   session = pyacd.get_session()
-  if not session.is_logined():
+  if not session.is_logged_in():
     raise pyacd.PyAmazonCloudDriveError("Not logined %s"%session)
 
   operation="getInfoByPath"
@@ -569,7 +569,7 @@ def get_info_by_id(object_id):
   :return: information.
   """
   session = pyacd.get_session()
-  if not session.is_logined():
+  if not session.is_logged_in():
     raise pyacd.PyAmazonCloudDriveError("Not logined %s"%session)
 
   operation="getInfoById"
@@ -596,7 +596,7 @@ def get_user_storage():
   :return: information.
   """
   session = pyacd.get_session()
-  if not session.is_logined():
+  if not session.is_logged_in():
     raise pyacd.PyAmazonCloudDriveError("Not logined %s"%session)
 
   operation="getUserStorage"
@@ -624,7 +624,7 @@ def get_subscription_problem():
   :return: (?)
   """
   session = pyacd.get_session()
-  if not session.is_logined():
+  if not session.is_logged_in():
     raise pyacd.PyAmazonCloudDriveError("Not logined %s"%session)
 
   operation="getSubscriptionProblem"

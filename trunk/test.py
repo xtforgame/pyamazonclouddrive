@@ -60,7 +60,7 @@ class AuthTest(unittest.TestCase):
     global session
     session=pyacd.login(email,password)
     self.assertTrue(session.is_valid(),"invalid session %s"%session)
-    self.assertTrue(session.is_logined(),"not logined %s"%session)
+    self.assertTrue(session.is_logged_in(),"not logined %s"%session)
     self.assertNotEqual(session.username,None,"username is None %s"%session)
     self.assertNotEqual(session.customer_id,None,"customer_id is None %s"%session)
     #sys.stderr.write(str(session))
@@ -91,7 +91,7 @@ class AuthTest(unittest.TestCase):
     global session
     session=pyacd.login(session=session)
     self.assertTrue(session.is_valid(),"invalid session %s"%session)
-    self.assertTrue(session.is_logined(),"not logined %s"%session)
+    self.assertTrue(session.is_logged_in(),"not logined %s"%session)
     self.assertNotEqual(session.username,None,"username is None %s"%session)
     self.assertNotEqual(session.customer_id,None,"customer_id is None %s"%session)
 """

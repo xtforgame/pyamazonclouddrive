@@ -52,7 +52,7 @@ Sample code(Downloading)
 ----
 import pyacd
 session = pyacd.login("someone@example.com","foobar")
-if session and session.is_logined():
+if session and session.is_logged_in():
   fileobj = pyacd.api.get_info_by_path("/path/to/file")
   data=pyacd.api.download_by_id(fileobj.object_id)
 ----
@@ -61,7 +61,7 @@ Sample code(Uploading)
 ----
 import pyacd
 session = pyacd.login("someone@example.com","foobar")
-if session and session.is_logined():
+if session and session.is_logged_in():
   fileobj = pyacd.api.create_by_path("/path/to/upload","filename")
   data = open("/path/to/file","rb").read()
   upload_url = pyacd.api.get_upload_url_by_id(fileobj.object_id,len(data))
