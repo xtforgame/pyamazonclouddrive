@@ -22,6 +22,10 @@
 # The Software shall be used for *YOUNGER* than you, not *OLDER*.
 # 
 
+# These are respective contributors who gives valuable feedback.
+# - Adam Compton (https://github.com/handyman5)
+# - Matt Luongo (https://github.com/mhluongo)
+
 """Library to access Amazon Cloud Drive
 
 Amazon Cloud Drive is based on...
@@ -74,6 +78,7 @@ if session and session.is_logged_in():
 """
 
 __author__ = "sakurai_youhei"
+__credits__ = ["Adam Compton", "Matt Luongo"]
 __copyright__ = "Copyright (c) 2011 anatanokeitai.com(sakurai_youhei)"
 __license__ = "MIT"
 __version__ = "0.0.6"
