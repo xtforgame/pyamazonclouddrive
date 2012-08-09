@@ -33,11 +33,11 @@ with open('README') as file:
 setup(name = "amazon-cloud-drive",
       version = '0.1.0',
       description = "PyAmazonCloudDrive (pyacd) is a 3rd-party Python"\
-                    "library for accessing Amazon Cloud Drives."\
+                    "library for accessing Amazon Cloud Drives.",
       author = "Youhei Sakurai",
       author_email = "sakurai.youhei@gmail.com",
-      scripts = ["bin/acdcat", "bin/acdget", "bin/acdlist", "bin/acdmkdir",
-                 "bin/acdput", "bin/acdrecycle", "bin/acdsession"],
+      scripts = ["bin/acdcat.py", "bin/acdget.py", "bin/acdlist.py", "bin/acdmkdir.py",
+                 "bin/acdput.py", "bin/acdrecycle.py", "bin/acdsession.py"],
       url = "http://code.google.com/p/pyamazonclouddrive/",
       long_description=long_description,
       packages = ["pyacd"],
