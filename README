@@ -1,7 +1,7 @@
 PyAmazonCloudDrive (pyacd) is a 3rd-party Python library for accessing 
 "Amazon Cloud Drive".
 
-These are respective contributors who gives valuable feedback.
+These are respective contributors who give valuable feedback.
  - Adam Compton (https://github.com/handyman5)
  - Matt Luongo (https://github.com/mhluongo)
 
@@ -13,7 +13,7 @@ _Note_: This is just an experimental project for the future like boto which
 ###############################################################################
 1) Amazon Cloud Drive: Terms of Use
 
-This implementation is all based on analisis by me(Youhei Sakurai) and 
+This implementation is all based on analysis by me (Youhei Sakurai) and 
 I'm not sure whether everyone who uses this library would be allowed by 
 "Amazon Cloud Drive: Terms of Use" or not. Therefore please read below 
 link carefully, then start to use this.
@@ -26,12 +26,12 @@ http://www.amazon.com/gp/help/customer/display.html/?nodeId=200557360
   otherwise tamper with, the Software, whether in whole or in part, or create 
   any derivative works from or of the Software.
 
-2) Limitation for number of devices. (up to eight devices)
+2) Limitation for number of devices. (Up to eight devices)
 
 Now below link disappeared but Amazon used to restrict the number of devices
 within 8, that may be because of something from a legal point of view. This 
 is counted by cookie so I recommend you to use persist session functionality
-of library; see also code written in bin/*.py.
+of library; see also code written in bin/acdsession.py.
 
 http://www.amazon.com/gp/help/customer/display.html/?ie=UTF8&nodeId=200557340\n
 
@@ -52,7 +52,7 @@ http://www.amazon.com/gp/help/customer/display.html/?ie=UTF8&nodeId=200557340\n
 
 3) Read source in pyacd and helps of "bin/*.py --help".
 
-4) It occured to me that someone said "Use the Source, Luke.".
+4) It occurred to me that someone said "Use the Source, Luke.".
 
 ###############################################################################
 # Example usage of bin/acdxxx.py
