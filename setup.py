@@ -24,17 +24,22 @@
 
 from setuptools import setup
 
+with open('README') as file:
+    long_description = file.read()
+
+# Followings are modified by Youhei Sakurai to make them adjust 
+# to project's repository. You can see original one from:
+# https://github.com/mhluongo/amazon-cloud-drive/blob/master/setup.py
 setup(name = "amazon-cloud-drive",
-      version = '0.0.6',
-      description = "A maintained fork of PyAmazonCloudDrive (pyacd), a "\
-                    "3rd-party Python library for accessing Amazon Cloud "\
-                    "Drives.",
-      author = "Sakurai Youhei",
-      maintainer = "Matt Luongo",
-      maintainer_email = "mhluongo@gmail.com",
+      version = '0.1.0',
+      description = "PyAmazonCloudDrive (pyacd) is a 3rd-party Python"\
+                    "library for accessing Amazon Cloud Drives."\
+      author = "Youhei Sakurai",
+      author_email = "sakurai.youhei@gmail.com",
       scripts = ["bin/acdcat", "bin/acdget", "bin/acdlist", "bin/acdmkdir",
-                 "bin/acdput", "bin/acdrecycle"],
-      url = "https://github.com/mhluongo/amazon-cloud-drive",
+                 "bin/acdput", "bin/acdrecycle", "bin/acdsession"],
+      url = "http://code.google.com/p/pyamazonclouddrive/",
+      long_description=long_description,
       packages = ["pyacd"],
       license = "MIT",
       classifiers = ["Development Status :: 4 - Beta",

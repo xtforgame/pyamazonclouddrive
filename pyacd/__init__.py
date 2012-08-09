@@ -18,9 +18,6 @@
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-# 
-# The Software shall be used for *YOUNGER* than you, not *OLDER*.
-# 
 
 # These are respective contributors who gives valuable feedback.
 # - Adam Compton (https://github.com/handyman5)
@@ -46,6 +43,7 @@ Amazon Cloud Drive is based on...
 You may use following functions and classes...
 
  * pyacd.login()
+ * pyacd.Session
  * pyacd.api.*
  * pyacd.types.*
  * pyacd.status.*
@@ -77,34 +75,49 @@ if session and session.is_logged_in():
 ----
 """
 
-__author__ = "sakurai_youhei"
+__author__ = "Youhei Sakurai"
 __credits__ = ["Adam Compton", "Matt Luongo"]
 __copyright__ = "Copyright (c) 2011 anatanokeitai.com(sakurai_youhei)"
 __license__ = "MIT"
-__version__ = "0.0.6"
-__maintainer__ = "sakurai_youhei"
+__version__ = "0.1.0"
+__maintainer__ = "Youhei Sakurai"
 __status__ = "Prototype"
 
-
 from pyacd.exception import *
-from pyacd.connection import Connection
-from pyacd.multipart import post_multipart
+from pyacd.connection import do_get, do_delete, do_post, do_put
+from pyacd.multipart import do_post_multipart
 
-from pyacd.auth import login
+from pyacd.auth import login, Session
 
 import types
 import status
-
 import api
 
+import urllib2
 
 debug_level=0
-conn=Connection()
 api_root="https://www.amazon.com/clouddrive/api/"
+
+
+session = None
+opener = None
+
 
 def get_session():
   """ Get current session having login status and tokens.
   :rtype: :class:`pyacd.session.Session`
   :return: Inclues cookies, username and customer_id.
   """
-  return conn.session
+  return session
+
+def rebuild_opener():
+  global opener
+  if not session:
+    raise PyAmazonCloudDriveError("pyacd.session must not be None.")
+  opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(session.cookies))
+  opener.addheaders = [(
+    'User-agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.75 Safari/535.7'
+  )]
+
+
+

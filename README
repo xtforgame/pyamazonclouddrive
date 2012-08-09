@@ -1,10 +1,22 @@
-PyAmazonCloudDrive? (pyacd) is 3rd-party Python library for accessing "Amazon Cloud Drive".
+PyAmazonCloudDrive (pyacd) is a 3rd-party Python library for accessing 
+"Amazon Cloud Drive".
 
-Now this is just an experimental project, but a GOAL is a few line upload-download like "boto".
+These are respective contributors who gives valuable feedback.
+ - Adam Compton (https://github.com/handyman5)
+ - Matt Luongo (https://github.com/mhluongo)
 
-######################################################
-# *WARNING* Amazon Cloud Drive: Terms of Use
-######################################################
+_Note_: This is just an experimental project for the future like boto which 
+        can upload/download files in a few lines in Python.
+
+###############################################################################
+# *WARNING* These are matters you must consider.
+###############################################################################
+1) Amazon Cloud Drive: Terms of Use
+
+This implementation is all based on analisis by me(Youhei Sakurai) and 
+I'm not sure whether everyone who uses this library would be allowed by 
+"Amazon Cloud Drive: Terms of Use" or not. Therefore please read below 
+link carefully, then start to use this.
 
 http://www.amazon.com/gp/help/customer/display.html/?nodeId=200557360
 
@@ -14,66 +26,56 @@ http://www.amazon.com/gp/help/customer/display.html/?nodeId=200557360
   otherwise tamper with, the Software, whether in whole or in part, or create 
   any derivative works from or of the Software.
 
-######################################################
-# *WARNING* device limit (up to eight devices.)
-######################################################
+2) Limitation for number of devices. (up to eight devices)
+
+Now below link disappeared but Amazon used to restrict the number of devices
+within 8, that may be because of something from a legal point of view. This 
+is counted by cookie so I recommend you to use persist session functionality
+of library; see also code written in bin/*.py.
 
 http://www.amazon.com/gp/help/customer/display.html/?ie=UTF8&nodeId=200557340\n
 
   Frequently Asked Questions
   How many devices can I use to access the files I've stored in my Cloud Drive?
 
-######################################################
+###############################################################################
 # Installation of pyacd
-######################################################
+###############################################################################
 
-(1) Checkout repository with svn. (Execute following command.)
+1) Checkout repository with svn. (Run following command.)
 
-  svn checkout http://pyamazonclouddrive.googlecode.com/svn/trunk/pyacd /path/to/your/pylibdir
+  svn checkout http://pyamazonclouddrive.googlecode.com/svn/trunk/
 
-(2) If you use python 2.5.x (or lower version one) and 
-    you have not ever used simplejson library, also execute 
-    following one.
+2) Run setup.py
 
-  svn checkout http://pyamazonclouddrive.googlecode.com/svn/trunk/simplejson /path/to/your/pylibdir
+3) Read source in pyacd and helps of "bin/*.py --help".
 
-(3) Read source in pyacd.
+4) It occured to me that someone said "Use the Source, Luke.".
 
-Use the Source, Luke.
+###############################################################################
+# Example usage of bin/acdxxx.py
+###############################################################################
 
-######################################################
-# Installation and Usage of acdxxx.py
-######################################################
+1) Upload all files in localdir to remotedir.
 
-(1) Checkout whole repository with svn. (Execute following command.)
+$ acdmkdir.py -e someone@example.com -p xxxx -s ~/.acdsession remotedir
+$ ls -F localdir | grep -v / | sed "s/[\*|@]$//g" | sed "s/^/localdir\//g" |\
+  acdput.py -s ~/.acdsession -d remotedir -
 
-  svn checkout http://pyamazonclouddrive.googlecode.com/svn/trunk/ ~/pyacd
-  export PATH=$PATH:~/pyacd
+2) Download all files in remotedir to localdir_else.
 
-(2) Upload files in somewhere.
+$ mkdir localdir_else
+$ acdlist.py -s ~/.acdsession -t FILE remotedir | sed "s/^/remotedir\//g" |\
+  acdget.py -s ~/.acdsession -d localdir_else -
 
-  acdmkdir.py -e someone@example.com -p xxxx -s ~/.acdsession somewhere
-  ls -F somewhere|grep -v /|sed "s/[\*|@]$//g"|sed "s/^/somewhere\//g"|acdput.py -s ~/.acdsession -d somewhere -
+3) Make alias if you need.
 
-(3) Download files to somewhere_else.
+$ alias acdget='acdget.py -s ~/.acdsession'
+$ alias acdlist='acdlist.py -s ~/.acdsession'
+$ alias acdmkdir='acdmkdir.py -s ~/.acdsession'
+$ alias acdrecycle='acdrecycle.py -s ~/.acdsession'
+$ alias acdput='acdput.py -s ~/.acdsession'
+$ alias acdcat='acdcat.py -s ~/.acdsession'
 
-  mkdir somewhere_else
-  acdlist.py -s ~/.acdsession -t FILE somewhere|sed "s/^/somewhere\//g"|acdget.py -s ~/.acdsession -d somewhere_else -
 
-(4) See also help.
 
-  acdget.py --help
-  acdlist.py --help
-  acdmkdir.py --help
-  acdrecycle.py --help
-  acdput.py --help
-  acdcat.py --help
-
-(5) Alias if you need.
-
-  alias acdget='acdget.py -s ~/.acdsession -q'
-  alias acdlist='acdlist.py -s ~/.acdsession -q'
-  alias acdmkdir='acdmkdir.py -s ~/.acdsession -q'
-  alias acdrecycle='acdrecycle.py -s ~/.acdsession -q'
-  alias acdput='acdput.py -s ~/.acdsession -q'
-  alias acdcat='acdcat.py -s ~/.acdsession -q'

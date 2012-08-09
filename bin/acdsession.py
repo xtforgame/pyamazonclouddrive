@@ -33,8 +33,8 @@ except ImportError:
   import pyacd
 
 parser=OptionParser(
-  epilog="This command move file(s) or dir(s) to Recycle of your Amazon Cloud Drive.",
-  usage="%prog [Options] path1 path2 - ...('-' means STDIN)",
+  epilog="This command updates/creates your session of Amazon Cloud Drive.",
+  usage="%prog -e youremail -p yourpassword -s path/to/sessionfile",
   version=pyacd.__version__
 )
 
@@ -58,103 +58,48 @@ parser.add_option(
 def main():
   opts,args=parser.parse_args(sys.argv[1:])
 
-  args=list(set(args))
-  if "-" in args:
-    args.remove("-")
-    args += [x.strip() for x in sys.stdin.readlines()]
+  for m in ["email","session"]:
+    if not opts.__dict__[m]:
+        print >>sys.stderr, "mandatory option is missing (%s)\n"%m
+        parser.print_help()
+        exit(2)
 
-  if 0==len(args):
-    sys.stderr.write("No path selected.\n")
-    parser.print_help()
-    sys.exit(2)
-  else:
-    pass
+  if not opts.password:
+    opts.password = getpass.getpass()
 
+  if os.path.isdir(opts.session):
+    print >>sys.stderr, "%s should not be directory."%s
+    exit(2)
 
-  # Check options of authentication
-  if opts.email:
-    if not opts.password:
-      opts.password = getpass.getpass()
-
-  if (opts.email and opts.password) or opts.session:
-    pass # OK case
-  else:
-    print >>sys.stderr, "Either email and password or session is mondatory."
-    sys.exit(2)
-
-  session = None; s = None
-  if opts.session:
+  if opts.verbose:
+    print >>sys.stderr, "Loading previous session...",
+  try:
+    s=pyacd.Session.load_from_file(opts.session)
     if opts.verbose:
-      print >>sys.stderr, "Loading previous session...",
-    try:
-      s=pyacd.Session.load_from_file(opts.session)
-      if opts.verbose:
-        print >>sys.stderr, "Done."
-    except:
-      s=pyacd.Session()
-      if opts.verbose:
-        print >>sys.stderr, "Failed."
+      print >>sys.stderr, "Done."
+  except:
+    s=pyacd.Session()
+    if opts.verbose:
+      print >>sys.stderr, "Failed."
 
   if opts.verbose:
     print >>sys.stderr, "Logging into Amazon.com...",
   try:
-    if opts.email and opts.password and s:
-      session=pyacd.login(opts.email,opts.password,session=s)
-    elif opts.email and opts.password:
-      session=pyacd.login(opts.email,opts.password)
-    else:
-      session=pyacd.login(session=s)
+    session=pyacd.login(opts.email,opts.password,session=s)
     if opts.verbose:
       print >>sys.stderr, "Done."
-  except:
-    if opts.verbose:
-      print >>sys.stderr, "Failed."
-      sys.exit(2)
-
-  # Check login status
-  if not session:
-    sys.stderr.write("Unexpected error occured.\n")
-    sys.exit(2)
-  elif not session.is_logged_in():
-    sys.stderr.write("Login failed.\n%s\n"%session)
-    sys.exit(2)
-
-
-  for path in args:
-    if path[0]!='/':path='/'+path
 
     if opts.verbose:
-      sys.stderr.write("Moving %s to Recycle ... "%(path))
+      print >>sys.stderr, "Updating current session...",
 
-    # get path
-    try:
-      pathobj = pyacd.api.get_info_by_path(path)
-    except pyacd.PyAmazonCloudDriveApiException,e:
-      sys.stderr.write("Aborted. ('%s')\n"%e.message)
-      continue
-    except pyacd.PyAmazonCloudDriveError,e:
-      sys.stderr.write("Not found.\n")
-      continue
-
-    if pathobj.Type!= pyacd.types.FILE and pathobj.Type!= pyacd.types.FOLDER :
-      sys.stderr.write("Aborted. ('%s<%s>' is special entity.)"%(path,pathobj.Type))
-      continue
-
-    # move
-    pyacd.api.recycle_bulk_by_id([pathobj.object_id,])
-
-    if opts.verbose:
-      sys.stderr.write("Done\n")
-
-  if opts.verbose:
-    print >>sys.stderr, "Updating current session...",
-  try:
     session.save_to_file(opts.session)
     if opts.verbose:
       print >>sys.stderr, "Done."
+
   except:
     if opts.verbose:
       print >>sys.stderr, "Failed."
+
 
 if __name__=="__main__":
   main()
