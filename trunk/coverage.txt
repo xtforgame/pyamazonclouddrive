@@ -13,3 +13,18 @@ pyacd\types             5      0   100%
 test                  171      4    98%
 ---------------------------------------
 TOTAL                 681     97    86%
+Thu Aug  9 20:32:59 UTC 2012
+Name                Stmts   Miss  Cover
+---------------------------------------
+pyacd/__init__         27      1    96%
+pyacd/api             197     33    83%
+pyacd/apiresponse     100     16    84%
+pyacd/auth             90     16    82%
+pyacd/connection       43     17    60%
+pyacd/exception        16     10    38%
+pyacd/multipart        29      0   100%
+pyacd/status            3      0   100%
+pyacd/types             5      0   100%
+test                  171      4    98%
+---------------------------------------
+TOTAL                 681     97    86%
