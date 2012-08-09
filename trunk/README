@@ -48,6 +48,8 @@ http://www.amazon.com/gp/help/customer/display.html/?ie=UTF8&nodeId=200557340\n
 
 2) Run setup.py
 
+  setup.py install
+
 3) Read source in pyacd and helps of "bin/*.py --help".
 
 4) It occured to me that someone said "Use the Source, Luke.".
