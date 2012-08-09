@@ -29,7 +29,7 @@ import pyacd
 pyacd.debug_level=2
 
 if len(sys.argv)!=4:
-  sys.stderr.write("usage: ./test.py email password acdsession")
+  sys.stderr.write("usage: ./test.py email password acdsession\n")
   sys.exit(2)
 
 email=sys.argv[1]
