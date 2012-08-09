@@ -79,7 +79,7 @@ __author__ = "Youhei Sakurai"
 __credits__ = ["Adam Compton", "Matt Luongo"]
 __copyright__ = "Copyright (c) 2011 anatanokeitai.com(sakurai_youhei)"
 __license__ = "MIT"
-__version__ = "0.1.1"
+__version__ = "0.1.0"
 __maintainer__ = "Youhei Sakurai"
 __status__ = "Prototype"
 
