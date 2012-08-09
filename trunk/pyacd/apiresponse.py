@@ -18,10 +18,8 @@
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-# 
-# The Software shall be used for Younger than you, not Older.
-# 
 
+import pyacd
 
 class UploadUrl(object):
   def __init__(self,result_json):
@@ -116,8 +114,8 @@ class Info(object):
 
   def __repr__(self):
     return '<Info: %s%s (type=%s,status=%s,version=%d)>' % (
-      self.path.encode('utf8'),
-      self.name.encode('utf8'),
+      (self.path) and self.path.encode('utf8') or "",
+      (self.name) and self.name.encode('utf8') or "",
       self.Type,
       self.status,
       self.version
@@ -125,8 +123,8 @@ class Info(object):
 
   def __str__(self):
     return '<Info: %s%s (type=%s,status=%s,version=%d)>' % (
-      self.path.encode('utf8'),
-      self.name.encode('utf8'),
+      (self.path) and self.path.encode('utf8') or "",
+      (self.name) and self.name.encode('utf8') or "",
       self.Type,
       self.status,
       self.version
@@ -150,7 +148,7 @@ class UserStorage(object):
     self.total_space=result_json.get("totalSpace")
     self.used_space=result_json.get("usedSpace")
     self.free_space=result_json.get("freeSpace")
-    if not self.total_space or not self.used_space or not self.free_space:
+    if self.total_space is None or self.used_space is None or self.free_space is None:
       raise pyacd.PyAmazonCloudDriveError("unexpected response %s"%str(result_json))
   
   def __repr__(self):

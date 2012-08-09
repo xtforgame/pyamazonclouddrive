@@ -20,71 +20,45 @@
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-# 
-# The Software shall be used for Younger than you, not Older.
-# 
-"""
-administrator@Tualatin ~/svn/pyacd $ ./acdmkdir.py --help
-Usage: acdmkdir.py [Options] dir1 dir2 - ...('-' means STDIN)
 
-Options:
-  --version             show program's version number and exit
-  -h, --help            show this help message and exit
-  -e EMAIL, --email=EMAIL
-                        email address for Amazon.com
-  -p PASSWORD, --password=PASSWORD
-                        password for Amazon.com
-  -s FILE, --session=FILE
-                        save or load login session to/from FILE
-  -v, --verbose         show debug infomation
-  -q, --quiet           quiet mode
-
-This command makes dir(s) in your Amazon Cloud Drive. If there is same named
-dir, making dir is aborted automatically.
-
-administrator@Tualatin ~/svn/pyacd $ ./acdmkdir.py -s ~/.session testdir
-Logining to Amazon.com ... Done
-Updating /home/administratora/.session ... Done
-Making testdir in / ... Done
-"""
-
-import sys
-import os
+import os, sys, getpass
 from optparse import OptionParser
-import pickle
 
-pyacd_lib_dir=os.path.dirname(os.__file__)+os.sep+"pyacd"
-if os.path.exists(pyacd_lib_dir) and os.path.isdir(pyacd_lib_dir):
-  sys.path.insert(0, pyacd_lib_dir)
+try:
+  import pyacd
+except ImportError:
+  pyacd_lib_dir=os.path.dirname(__file__)+os.sep+".."
+  if os.path.exists(pyacd_lib_dir) and os.path.isdir(pyacd_lib_dir):
+    sys.path.insert(0, pyacd_lib_dir)
+  import pyacd
 
-import pyacd
+parser=OptionParser(
+  epilog="This command makes dir(s) in your Amazon Cloud Drive. "+
+         "If the same named dir exists, operation will be cancelled "+
+         "automatically.",
+  usage="%prog [Options] dir1 dir2 - ...('-' means STDIN)",
+  version=pyacd.__version__
+)
 
-parser=OptionParser(epilog="This command makes dir(s) in your Amazon Cloud Drive. "+
-                            "If there is same named dir, making dir is aborted "+
-                            "automatically.",
-                    usage="%prog [Options] dir1 dir2 - ...('-' means STDIN)",version="%prog 0.2")
-
-parser.add_option("-e","--email",dest="email",action="store",default=None,
-                  help="email address for Amazon.com")
-parser.add_option("-p","--password",dest="password",action="store",default=None,
-                  help="password for Amazon.com")
-parser.add_option("-s","--session",dest="session",action="store",default=None,
-                  metavar="FILE",help="save or load login session to/from FILE")
-parser.add_option("-v","--verbose",dest="verbose",action="store_true",default=False,
-                  help="show debug infomation")
-parser.add_option("-q","--quiet",dest="quiet",action="store_true",default=False,
-                  help="quiet mode")
+parser.add_option(
+  "-e",dest="email",action="store",default=None,
+  help="email address for Amazon.com"
+)
+parser.add_option(
+  "-p",dest="password",action="store",default=None,
+  help="password for Amazon.com"
+)
+parser.add_option(
+  "-s",dest="session",action="store",default=None,metavar="FILE",
+  help="save/load login session to/from FILE"
+)
+parser.add_option(
+  "-v",dest="verbose",action="store_true",default=False,
+  help="show verbose message"
+)
 
 def main():
   opts,args=parser.parse_args(sys.argv[1:])
-
-  # Check options of authentication
-  if opts.session and os.path.exists(opts.session) and not os.path.isdir(opts.session):
-    pass
-  elif not opts.email or not opts.password:
-    sys.stderr.write("!! email and password are required !!\n")
-    parser.print_help()
-    sys.exit(2)
 
   args=list(set(args))
   if "-" in args:
@@ -92,50 +66,59 @@ def main():
     args += [x.strip() for x in sys.stdin.readlines()]
 
   if 0==len(args):
-    sys.stderr.write("!! no dir selected !!\n")
+    sys.stderr.write("No dir selected.\n")
     parser.print_help()
     sys.exit(2)
   else:
     pass
 
-  # Login to Amazon.com
-  session=None
+  # Check options of authentication
+  if opts.email:
+    if not opts.password:
+      opts.password = getpass.getpass()
+
+  if (opts.email and opts.password) or opts.session:
+    pass # OK case
+  else:
+    print >>sys.stderr, "Either email and password or session is mondatory."
+    sys.exit(2)
+
+  session = None; s = None
+  if opts.session:
+    if opts.verbose:
+      print >>sys.stderr, "Loading previous session...",
+    try:
+      s=pyacd.Session.load_from_file(opts.session)
+      if opts.verbose:
+        print >>sys.stderr, "Done."
+    except:
+      s=pyacd.Session()
+      if opts.verbose:
+        print >>sys.stderr, "Failed."
+
+  if opts.verbose:
+    print >>sys.stderr, "Logging into Amazon.com...",
   try:
-    if not opts.quiet:
-      sys.stderr.write("Logining to Amazon.com ... ")
-    if opts.email and opts.password:
+    if opts.email and opts.password and s:
+      session=pyacd.login(opts.email,opts.password,session=s)
+    elif opts.email and opts.password:
       session=pyacd.login(opts.email,opts.password)
     else:
-      fp=open(opts.session,"rb")
-      session=pickle.load(fp)
-      fp.close()
-      session=pyacd.login(session=session)
+      session=pyacd.login(session=s)
+    if opts.verbose:
+      print >>sys.stderr, "Done."
   except:
-    pass
+    if opts.verbose:
+      print >>sys.stderr, "Failed."
+      sys.exit(2)
 
   # Check login status
   if not session:
     sys.stderr.write("Unexpected error occured.\n")
     sys.exit(2)
-  elif not session.is_valid():
-    sys.stderr.write("Session is invalid.\n%s\n"%session)
-    sys.exit(2)
   elif not session.is_logged_in():
     sys.stderr.write("Login failed.\n%s\n"%session)
     sys.exit(2)
-
-  if not opts.quiet:
-    sys.stderr.write("Done\n")
-
-  if opts.session:
-    if not opts.quiet:
-      sys.stderr.write("Updating %s ... "%opts.session)
-    fp=open(opts.session,"wb")
-    fp.truncate()
-    pickle.dump(session,fp)
-    fp.close()
-    if not opts.quiet:
-      sys.stderr.write("Done\n")
 
   for path in args:
     if path[0]!='/':path='/'+path
@@ -143,22 +126,32 @@ def main():
     parent = "/".join(path.split("/")[:-1])
     parent = parent if len(parent)!=0 else "/"
 
-    if not opts.quiet:
+    if opts.verbose:
       sys.stderr.write("Making %s in %s ... "%(folder,parent))
 
     # create folder
-    if opts.verbose:
-      sys.stderr.write("create ")
     try:
       pyacd.api.create_by_path(parent,folder,Type=pyacd.types.FOLDER)
     except pyacd.PyAmazonCloudDriveApiException,e:
-      sys.stderr.write("Aborted. ('%s')\n"%e.message)
+      sys.stderr.write("Aborted.\n"%e.message)
       continue
-    if opts.verbose:
-      sys.stderr.write("-> ")
+    except pyacd.PyAmazonCloudDriveError,e:
+      sys.stderr.write("Already exists.\n")
+      continue
 
-    if not opts.quiet:
+    if opts.verbose:
       sys.stderr.write("Done\n")
+
+
+  if opts.verbose:
+    print >>sys.stderr, "Updating current session...",
+  try:
+    session.save_to_file(opts.session)
+    if opts.verbose:
+      print >>sys.stderr, "Done."
+  except:
+    if opts.verbose:
+      print >>sys.stderr, "Failed."
 
 
 if __name__=="__main__":
