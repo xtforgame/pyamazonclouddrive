@@ -1,5 +1,4 @@
 #summary Report for result of test coverage
-#sidebar Coverage Report
 
 = How to create reports =
 {{{
