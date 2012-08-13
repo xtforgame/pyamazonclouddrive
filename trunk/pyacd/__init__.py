@@ -114,10 +114,16 @@ def rebuild_opener():
   global opener
   if not session:
     raise PyAmazonCloudDriveError("pyacd.session must not be None.")
-  opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(session.cookies))
+  opener = urllib2.build_opener(CustomHTTPCookieProcessor(session.cookies))
   opener.addheaders = [(
     'User-agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.75 Safari/535.7'
   )]
 
-
-
+# Below codes is from http://weboo-returns.com/blog/urllib2-raises-error-by-201-response/
+class CustomHTTPCookieProcessor(urllib2.HTTPCookieProcessor):
+  def http_error_201(self, request, response, code, msg, hdrs):
+    return response
+  def http_error_204(self, request, response, code, msg, hdrs):
+    return response
+  def http_error_206(self, request, response, code, msg, hdrs):
+    return response
