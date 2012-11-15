@@ -96,12 +96,17 @@ import api
 import urllib2
 
 debug_level=0
-api_root="https://www.amazon.com/clouddrive/api/"
+amazon_domain="www.amazon.com"
+api_root="https://"+amazon_domain+"/clouddrive/api/"
 
 
 session = None
 opener = None
 
+def set_amazon_domain(domain):
+  global amazon_domain,api_root
+  amazon_domain=domain
+  api_root="https://"+amazon_domain+"/clouddrive/api/"
 
 def get_session():
   """ Get current session having login status and tokens.

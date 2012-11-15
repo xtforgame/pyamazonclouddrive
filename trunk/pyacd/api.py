@@ -168,6 +168,9 @@ def get_upload_url_by_id(object_id,size,method="POST"):
   if not session.is_logged_in():
     raise pyacd.PyAmazonCloudDriveError("Not logined %s"%session)
 
+  if not session.touValidate:
+    raise pyacd.PyAmazonCloudDriveError("You need to agree with license terms at web page: https://%s/clouddrive"%pyacd.amazon_domain)
+
   operation="getUploadUrlById"
   params={
     "_":int(time.time()),

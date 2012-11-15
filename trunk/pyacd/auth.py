@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # Copyright (c) 2011 anatanokeitai.com(sakurai_youhei)
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -32,17 +34,18 @@ def login(email=None,password=None,session=None):
   else:
     pyacd.session=Session()
   
-  end_point="https://www.amazon.com/clouddrive"
+  end_point="https://"+pyacd.amazon_domain+"/clouddrive"
   html=pyacd.do_get(end_point)
 
-  NOT_LOGGED_IN=r"ue_url='\/gp\/feature\.html"
+  NOT_LOGGED_INS=[r"ue_url='\/gp\/feature\.html",r'<form name="signIn" method="POST"']
   CONTINUE_REQUIRED=r'<form action="\/clouddrive" id="continueForm"'
 
-  if re.search(NOT_LOGGED_IN,html):
+  if False in [re.search(x,html) is None for x in NOT_LOGGED_INS]:
     if not (email and password):
       raise pyacd.PyAmazonCloudDriveError("Both email and password are required.")
-    link = re.search(r'"(\/gp\/drive\/files.*?)"',html).groups()[0]
-    html=pyacd.do_get("https://www.amazon.com"+link)
+    link = re.search(r'"(\/gp\/drive\/files.*?)"',html)
+    if link:
+      html=pyacd.do_get("https://"+pyacd.amazon_domain+link.groups()[0])
     form = re.search(r'<form name="signIn" method="POST" .*?<\/form>',re.sub(r"\n|\r","",html)).group()
     action = re.search('action="(.*?)"',form).groups()[0]
     inputs = [re.search(' name="(.*?)".*? value="(.*?)"',x) for x in re.findall('<input.*?>',form)]
@@ -52,7 +55,7 @@ def login(email=None,password=None,session=None):
     params["password"]=password
     body=urllib.urlencode(params)
     html=pyacd.do_post(action,body)
-    if re.search(NOT_LOGGED_IN,html):
+    if False in [re.search(x,html) is None for x in NOT_LOGGED_INS]:
       raise pyacd.PyAmazonCloudDriveError("Login failed.")
 
   if re.search(CONTINUE_REQUIRED,html):
@@ -61,7 +64,7 @@ def login(email=None,password=None,session=None):
     inputs = [re.search(' name="(.*?)".*? value="(.*?)"',x) for x in re.findall('<input.*?>',form)]
     params = dict([x.groups() for x in inputs if x!=None])
     if action[0]=="/":
-      action = "https://www.amazon.com"+action
+      action = "https://"+pyacd.amazon_domain+action
     body=urllib.urlencode(params)
     html=pyacd.do_post(action,body)
 
@@ -74,9 +77,19 @@ def login(email=None,password=None,session=None):
 
     username=html.split("customer_greeting",1)[1]
     username=username.split("<",1)[0]
-    username=username.split(",")[1][1:]
-    username=re.sub(r'\..*','',username)
+    # ToDo: how to make it globalized
+    try:
+      # For www.amazon.com
+      username=username.split(",")[1][1:]
+      username=re.sub(r'\..*','',username)
+    except:
+      # For www.amazon.co.jp
+      username = username.decode('shift-jis')
+      username=username.split(u"、")[1].split(u"さん")[0]
     pyacd.session.username=username
+
+    if re.search(r"ADrive\.touValidate = true;",html):
+      pyacd.session.touValidate = True
   except:
     pass
 
@@ -88,6 +101,7 @@ class Session(object):
   def __init__(self,session=None):
     self.username=None
     self.customer_id=None
+    self.touValidate = False;
     pyacd.session=self
     if session:
       self.cookies = session.cookies
@@ -95,7 +109,7 @@ class Session(object):
     else:
       self.cookies=PicklableCookieJar()
       pyacd.rebuild_opener()
-      end_point = "http://www.amazon.com/"
+      end_point = "http://"+pyacd.amazon_domain+"/"
       pyacd.do_get(end_point)
 
   @classmethod
@@ -112,10 +126,10 @@ class Session(object):
     fp.close()
 
   def __repr__(self):
-    return '<Session: username: %s, customer_id: %s>' % (self.username, self.customer_id)
+    return '<Session: username: %s, customer_id: %s, touValidate: %s>' % (self.username, self.customer_id, self.touValidate)
 
   def __str__(self):
-    return '<Session: username: %s, customer_id: %s>' % (self.username, self.customer_id)
+    return '<Session: username: %s, customer_id: %s, touValidate: %s>' % (self.username, self.customer_id, self.touValidate)
 
   def is_logged_in(self):
     return (self.username and self.customer_id)
