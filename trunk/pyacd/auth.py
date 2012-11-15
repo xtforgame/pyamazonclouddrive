@@ -35,13 +35,15 @@ def login(email=None,password=None,session=None):
   end_point="https://www.amazon.com/clouddrive"
   html=pyacd.do_get(end_point)
 
-  NOT_LOGGED_IN=r'<form name="signIn" method="POST" id="ap_signin_form"'
+  NOT_LOGGED_IN=r"ue_url='\/gp\/feature\.html"
   CONTINUE_REQUIRED=r'<form action="\/clouddrive" id="continueForm"'
 
   if re.search(NOT_LOGGED_IN,html):
     if not (email and password):
       raise pyacd.PyAmazonCloudDriveError("Both email and password are required.")
-    form = re.search(NOT_LOGGED_IN+r".*?<\/form>",re.sub(r"\n|\r","",html)).group()
+    link = re.search(r'"(\/gp\/drive\/files.*?)"',html).groups()[0]
+    html=pyacd.do_get("https://www.amazon.com"+link)
+    form = re.search(r'<form name="signIn" method="POST" .*?<\/form>',re.sub(r"\n|\r","",html)).group()
     action = re.search('action="(.*?)"',form).groups()[0]
     inputs = [re.search(' name="(.*?)".*? value="(.*?)"',x) for x in re.findall('<input.*?>',form)]
     params = dict([x.groups() for x in inputs if x!=None])
@@ -120,7 +122,7 @@ class Session(object):
 
   def print_debug(self):
     print "*"*20
-    for k,v in self.cookies.items():
+    for k,v in self.cookies._cookies.items():
       print "%s=%s"%(k,v)
 
 
