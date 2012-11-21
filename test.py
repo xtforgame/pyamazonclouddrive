@@ -37,7 +37,6 @@ password=sys.argv[2]
 acdsession=sys.argv[3]
 
 print "**** Here are arguments **********"
-print "domain:",pyacd.amazon_domain
 print "email:",email
 print "password:",password
 print "acdsession:",acdsession
@@ -60,20 +59,17 @@ class AuthTest(unittest.TestCase):
     self.assertTrue(session.is_logged_in(),"not logined %s"%session)
     self.assertNotEqual(session.username,None,"username is None %s"%session)
     self.assertNotEqual(session.customer_id,None,"customer_id is None %s"%session)
-    session.__str__()
-    session.__repr__()
+    str(session)
     session.save_to_file(acdsession)
 
   def test_2_LoginWithAcdSession(self):
     session = pyacd.Session.load_from_file(acdsession)
-    session.__str__()
-    session.__repr__()
+    str(session)
     session = pyacd.login(session=session)
     self.assertTrue(session.is_logged_in(),"not logined %s"%session)
     self.assertNotEqual(session.username,None,"username is None %s"%session)
     self.assertNotEqual(session.customer_id,None,"customer_id is None %s"%session)
-    session.__str__()
-    session.__repr__()
+    str(session)
     session.save_to_file(acdsession)
 
   def test_3_LoginWithNoneEmail(self):
@@ -189,7 +185,7 @@ class BasicCommandTest(unittest.TestCase):
     print >>sys.stderr,""
     ret = os.system("bin"+os.sep+"acdsession.py --help")
     self.assertEqual(ret,0,"external command failed.")
-    ret = os.system("bin"+os.sep+"acdsession.py -v -e %s -p %s -s %s --domain=%s"%(email,password,acdsession,pyacd.amazon_domain))
+    ret = os.system("bin"+os.sep+"acdsession.py -v -e %s -p %s -s %s"%(email,password,acdsession))
     self.assertEqual(ret,0,"external command failed.")
 
   def test_2_acdmkdir(self):
@@ -197,7 +193,7 @@ class BasicCommandTest(unittest.TestCase):
     print >>sys.stderr,""
     ret = os.system("bin"+os.sep+"acdmkdir.py --help")
     self.assertEqual(ret,0,"external command failed.")
-    ret = os.system("bin"+os.sep+"acdmkdir.py -v -s %s %s --domain=%s"%(acdsession,testdir,pyacd.amazon_domain))
+    ret = os.system("bin"+os.sep+"acdmkdir.py -v -s %s %s"%(acdsession,testdir))
     self.assertEqual(ret,0,"external command failed.")
 
   def test_3_acdput(self):
@@ -205,7 +201,7 @@ class BasicCommandTest(unittest.TestCase):
     print >>sys.stderr,""
     ret = os.system("bin"+os.sep+"acdput.py --help")
     self.assertEqual(ret,0,"external command failed.")
-    ret = os.system("bin"+os.sep+"acdput.py -v -s %s LICENSE test.py -d /%s --domain=%s"%(acdsession,testdir,pyacd.amazon_domain))
+    ret = os.system("bin"+os.sep+"acdput.py -v -s %s LICENSE test.py -d /%s"%(acdsession,testdir))
     self.assertEqual(ret,0,"external command failed.")
 
   def test_4_acdlist(self):
@@ -213,7 +209,7 @@ class BasicCommandTest(unittest.TestCase):
     print >>sys.stderr,""
     ret = os.system("bin"+os.sep+"acdlist.py --help")
     self.assertEqual(ret,0,"external command failed.")
-    ret = os.system("bin"+os.sep+"acdlist.py -v -s %s -l %s --domain=%s"%(acdsession,testdir,pyacd.amazon_domain))
+    ret = os.system("bin"+os.sep+"acdlist.py -v -s %s -l %s"%(acdsession,testdir))
     self.assertEqual(ret,0,"external command failed.")
 
   def test_5_acdcat(self):
@@ -221,7 +217,7 @@ class BasicCommandTest(unittest.TestCase):
     print >>sys.stderr,""
     ret = os.system("bin"+os.sep+"acdcat.py --help")
     self.assertEqual(ret,0,"external command failed.")
-    ret = os.system("bin"+os.sep+"acdcat.py -v -s %s /%s/LICENSE --domain=%s"%(acdsession,testdir,pyacd.amazon_domain))
+    ret = os.system("bin"+os.sep+"acdcat.py -v -s %s /%s/LICENSE"%(acdsession,testdir))
     self.assertEqual(ret,0,"external command failed.")
 
   def test_6_acdget(self):
@@ -230,7 +226,7 @@ class BasicCommandTest(unittest.TestCase):
     ret = os.system("bin"+os.sep+"acdget.py --help")
     self.assertEqual(ret,0,"external command failed.")
     os.mkdir(testdir)
-    ret = os.system("bin"+os.sep+"acdget.py -v -s %s /%s/LICENSE /%s/test.py -d %s --domain=%s"%(acdsession,testdir,testdir,testdir,pyacd.amazon_domain))
+    ret = os.system("bin"+os.sep+"acdget.py -v -s %s /%s/LICENSE /%s/test.py -d %s"%(acdsession,testdir,testdir,testdir))
     self.assertEqual(ret,0,"external command failed.")
     local = open("LICENSE","rb").read()
     remote = open(testdir+os.sep+"LICENSE","rb").read()
@@ -245,7 +241,7 @@ class BasicCommandTest(unittest.TestCase):
     print >>sys.stderr,""
     ret = os.system("bin"+os.sep+"acdrecycle.py --help")
     self.assertEqual(ret,0,"external command failed.")
-    ret = os.system("bin"+os.sep+"acdrecycle.py -v -s %s %s --domain=%s"%(acdsession,testdir,pyacd.amazon_domain))
+    ret = os.system("bin"+os.sep+"acdrecycle.py -v -s %s %s"%(acdsession,testdir))
     self.assertEqual(ret,0,"external command failed.")
 
 

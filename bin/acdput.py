@@ -41,16 +41,12 @@ parser=OptionParser(
 )
 
 parser.add_option(
-  "--domain",dest="domain",action="store",default="www.amazon.com",
-  help="domain of Amazon [default: %default]"
-)
-parser.add_option(
   "-e",dest="email",action="store",default=None,
-  help="email address for Amazon"
+  help="email address for Amazon.com"
 )
 parser.add_option(
   "-p",dest="password",action="store",default=None,
-  help="password for Amazon"
+  help="password for Amazon.com"
 )
 parser.add_option(
   "-s",dest="session",action="store",default=None,metavar="FILE",
@@ -67,7 +63,6 @@ parser.add_option(
 
 def main():
   opts,args=parser.parse_args(sys.argv[1:])
-  pyacd.set_amazon_domain(opts.domain)
 
   args=list(set(args))
   if "-" in args:
@@ -112,7 +107,7 @@ def main():
         print >>sys.stderr, "Failed."
 
   if opts.verbose:
-    print >>sys.stderr, "Logging into %s..."%opts.domain,
+    print >>sys.stderr, "Logging into Amazon.com...",
   try:
     if opts.email and opts.password and s:
       session=pyacd.login(opts.email,opts.password,session=s)
@@ -145,7 +140,7 @@ def main():
       sys.stderr.write('"%s" is file\n'%path)
       sys.exit(2)
   except pyacd.PyAmazonCloudDriveApiException,e:
-    sys.stderr.write('"%s"\n'%e.reason)
+    sys.stderr.write('"%s"\n'%e.message)
     sys.exit(2)
 
 
@@ -159,13 +154,7 @@ def main():
       sys.stderr.write("Uploading %s to %s ... "%(filename,path))
 
     fileobj = pyacd.api.create_by_path(path,filename)
-    try:
-      upload_url = pyacd.api.get_upload_url_by_id(fileobj.object_id,len(filedata))
-    except pyacd.PyAmazonCloudDriveError,e:
-      if opts.verbose:
-        print >>sys.stderr, "Failed."
-      sys.stderr.write('"%s"\n'%e)
-      continue
+    upload_url = pyacd.api.get_upload_url_by_id(fileobj.object_id,len(filedata))
     end_point=upload_url.http_request.end_point
     parameters=upload_url.http_request.parameters
 

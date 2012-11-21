@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # Copyright (c) 2011 anatanokeitai.com(sakurai_youhei)
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -27,20 +25,6 @@ import urllib, cookielib
 import pyacd
 
 def login(email=None,password=None,session=None):
-  """Login either with email and password or session.
-
-  :type email: string
-  :param email: email address registered to Amazon
-
-  :type password: string
-  :param password: password
-
-  :type session: pyacd.session.Session
-  :param session: previous session
-
-  :rtype: :class:`pyacd.session.Session`
-  :return: Inclues cookies, username and customer_id.
-  """
   if session:
     pyacd.session=Session(session)
   elif email is None or password is None:
@@ -48,19 +32,16 @@ def login(email=None,password=None,session=None):
   else:
     pyacd.session=Session()
   
-  end_point="https://"+pyacd.amazon_domain+"/clouddrive"
+  end_point="https://www.amazon.com/clouddrive"
   html=pyacd.do_get(end_point)
 
-  NOT_LOGGED_INS=[r"ue_url='\/gp\/feature\.html",r'<form name="signIn" method="POST"']
+  NOT_LOGGED_IN=r'<form name="signIn" method="POST" id="ap_signin_form"'
   CONTINUE_REQUIRED=r'<form action="\/clouddrive" id="continueForm"'
 
-  if False in [re.search(x,html) is None for x in NOT_LOGGED_INS]:
+  if re.search(NOT_LOGGED_IN,html):
     if not (email and password):
       raise pyacd.PyAmazonCloudDriveError("Both email and password are required.")
-    link = re.search(r'"(\/gp\/drive\/files.*?)"',html)
-    if link:
-      html=pyacd.do_get("https://"+pyacd.amazon_domain+link.groups()[0])
-    form = re.search(r'<form name="signIn" method="POST" .*?<\/form>',re.sub(r"\n|\r","",html)).group()
+    form = re.search(NOT_LOGGED_IN+r".*?<\/form>",re.sub(r"\n|\r","",html)).group()
     action = re.search('action="(.*?)"',form).groups()[0]
     inputs = [re.search(' name="(.*?)".*? value="(.*?)"',x) for x in re.findall('<input.*?>',form)]
     params = dict([x.groups() for x in inputs if x!=None])
@@ -69,7 +50,7 @@ def login(email=None,password=None,session=None):
     params["password"]=password
     body=urllib.urlencode(params)
     html=pyacd.do_post(action,body)
-    if False in [re.search(x,html) is None for x in NOT_LOGGED_INS]:
+    if re.search(NOT_LOGGED_IN,html):
       raise pyacd.PyAmazonCloudDriveError("Login failed.")
 
   if re.search(CONTINUE_REQUIRED,html):
@@ -78,7 +59,7 @@ def login(email=None,password=None,session=None):
     inputs = [re.search(' name="(.*?)".*? value="(.*?)"',x) for x in re.findall('<input.*?>',form)]
     params = dict([x.groups() for x in inputs if x!=None])
     if action[0]=="/":
-      action = "https://"+pyacd.amazon_domain+action
+      action = "https://www.amazon.com"+action
     body=urllib.urlencode(params)
     html=pyacd.do_post(action,body)
 
@@ -91,19 +72,9 @@ def login(email=None,password=None,session=None):
 
     username=html.split("customer_greeting",1)[1]
     username=username.split("<",1)[0]
-    # ToDo: how to make it globalized
-    try:
-      # For www.amazon.com
-      username=username.split(",")[1][1:]
-      username=re.sub(r'\..*','',username)
-    except:
-      # For www.amazon.co.jp
-      username = username.decode('shift-jis')
-      username=username.split(u"、")[1].split(u"さん")[0]
+    username=username.split(",")[1][1:]
+    username=re.sub(r'\..*','',username)
     pyacd.session.username=username
-
-    if re.search(r"ADrive\.touValidate = true;",html):
-      pyacd.session.agreed_with_terms = True
   except:
     pass
 
@@ -115,7 +86,6 @@ class Session(object):
   def __init__(self,session=None):
     self.username=None
     self.customer_id=None
-    self.agreed_with_terms = False;
     pyacd.session=self
     if session:
       self.cookies = session.cookies
@@ -123,7 +93,7 @@ class Session(object):
     else:
       self.cookies=PicklableCookieJar()
       pyacd.rebuild_opener()
-      end_point = "http://"+pyacd.amazon_domain+"/"
+      end_point = "http://www.amazon.com/"
       pyacd.do_get(end_point)
 
   @classmethod
@@ -140,17 +110,17 @@ class Session(object):
     fp.close()
 
   def __repr__(self):
-    return '<Session: username: %s, customer_id: %s, agreed_with_terms: %s>' % (self.username, self.customer_id, self.agreed_with_terms)
+    return '<Session: username: %s, customer_id: %s>' % (self.username, self.customer_id)
 
   def __str__(self):
-    return '<Session: username: %s, customer_id: %s, agreed_with_terms: %s>' % (self.username, self.customer_id, self.agreed_with_terms)
+    return '<Session: username: %s, customer_id: %s>' % (self.username, self.customer_id)
 
   def is_logged_in(self):
     return (self.username and self.customer_id)
 
   def print_debug(self):
     print "*"*20
-    for k,v in self.cookies._cookies.items():
+    for k,v in self.cookies.items():
       print "%s=%s"%(k,v)
 
 

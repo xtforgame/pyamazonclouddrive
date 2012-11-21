@@ -31,7 +31,7 @@ with open('README') as file:
 # to project's repository. You can see original one from:
 # https://github.com/mhluongo/amazon-cloud-drive/blob/master/setup.py
 setup(name = "amazon-cloud-drive",
-      version = '0.1.2',
+      version = '0.1.1',
       description = "PyAmazonCloudDrive (pyacd) is a 3rd-party Python"\
                     "library for accessing Amazon Cloud Drives.",
       author = "Youhei Sakurai",

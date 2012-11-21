@@ -43,7 +43,6 @@ Amazon Cloud Drive is based on...
 You may use following functions and classes...
 
  * pyacd.login()
- * pyacd.set_amazon_domain()
  * pyacd.Session
  * pyacd.api.*
  * pyacd.types.*
@@ -64,7 +63,7 @@ Sample code(Uploading)
 ----
 import pyacd
 session = pyacd.login("someone@example.com","foobar")
-if session and session.is_logged_in() and session.agreed_with_terms:
+if session and session.is_logged_in():
   fileobj = pyacd.api.create_by_path("/path/to/upload","filename")
   data = open("/path/to/file","rb").read()
   upload_url = pyacd.api.get_upload_url_by_id(fileobj.object_id,len(data))
@@ -80,7 +79,7 @@ __author__ = "Youhei Sakurai"
 __credits__ = ["Adam Compton", "Matt Luongo"]
 __copyright__ = "Copyright (c) 2011 anatanokeitai.com(sakurai_youhei)"
 __license__ = "MIT"
-__version__ = "0.1.2"
+__version__ = "0.1.1"
 __maintainer__ = "Youhei Sakurai"
 __status__ = "Prototype"
 
@@ -97,20 +96,12 @@ import api
 import urllib2
 
 debug_level=0
-amazon_domain="www.amazon.com"
-api_root="https://"+amazon_domain+"/clouddrive/api/"
+api_root="https://www.amazon.com/clouddrive/api/"
 
 
 session = None
 opener = None
 
-def set_amazon_domain(domain):
-  """ Switch Amazon's domain. e.g. from www.amazon.com to www.amazon.co.jp
-  :type domain: string
-  """
-  global amazon_domain,api_root
-  amazon_domain=domain
-  api_root="https://"+amazon_domain+"/clouddrive/api/"
 
 def get_session():
   """ Get current session having login status and tokens.
@@ -127,13 +118,6 @@ def rebuild_opener():
   opener.addheaders = [(
     'User-agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.75 Safari/535.7'
   )]
-
-def get_device_serial_number():
-  ubidlist = {
-    "www.amazon.com": "ubid-main",
-    "www.amazon.co.jp": "ubid-acbjp"
-  }
-  return session.cookies._cookies[amazon_domain[3:]]["/"][ubidlist[amazon_domain]].value
 
 # Below codes is from http://weboo-returns.com/blog/urllib2-raises-error-by-201-response/
 class CustomHTTPCookieProcessor(urllib2.HTTPCookieProcessor):

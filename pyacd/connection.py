@@ -60,13 +60,13 @@ def _do_request(req,body):
   """
   if not pyacd.session:
     raise pyacd.PyAmazonCloudDriveError("session is None.")
-  domain = pyacd.amazon_domain[3:]
-  if pyacd.session.cookies._cookies.get(domain) and\
-     pyacd.session.cookies._cookies[domain].get("/") and\
-     pyacd.session.cookies._cookies[domain]["/"].get("session-id"):
+
+  if pyacd.session.cookies._cookies.get(".amazon.com") and\
+     pyacd.session.cookies._cookies[".amazon.com"].get("/") and\
+     pyacd.session.cookies._cookies[".amazon.com"]["/"].get("session-id"):
     req.add_header(
       "x-amzn-SessionId",
-      pyacd.session.cookies._cookies[domain]["/"]["session-id"].value
+      pyacd.session.cookies._cookies[".amazon.com"]["/"]["session-id"].value
     )
 
   try:
