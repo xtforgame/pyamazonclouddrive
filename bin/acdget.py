@@ -41,12 +41,16 @@ parser=OptionParser(
 )
 
 parser.add_option(
+  "--domain",dest="domain",action="store",default="www.amazon.com",
+  help="domain of Amazon [default: %default]"
+)
+parser.add_option(
   "-e",dest="email",action="store",default=None,
-  help="email address for Amazon.com"
+  help="email address for Amazon"
 )
 parser.add_option(
   "-p",dest="password",action="store",default=None,
-  help="password for Amazon.com"
+  help="password for Amazon"
 )
 parser.add_option(
   "-s",dest="session",action="store",default=None,metavar="FILE",
@@ -67,6 +71,7 @@ parser.add_option(
 
 def main():
   opts,args=parser.parse_args(sys.argv[1:])
+  pyacd.set_amazon_domain(opts.domain)
 
   args=list(set(args))
   if "-" in args:
@@ -116,7 +121,7 @@ def main():
         print >>sys.stderr, "Failed."
 
   if opts.verbose:
-    print >>sys.stderr, "Logging into Amazon.com...",
+    print >>sys.stderr, "Logging into %s..."%opts.domain,
   try:
     if opts.email and opts.password and s:
       session=pyacd.login(opts.email,opts.password,session=s)

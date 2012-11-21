@@ -140,7 +140,7 @@ def can_device_download():
     "customerId":session.customer_id,
     "ContentType":"JSON",
     "deviceId.deviceType":"ubid",
-    "deviceId.deviceSerialNumber":pyacd.session.cookies._cookies[".amazon.com"]["/"]["ubid-main"].value
+    "deviceId.deviceSerialNumber":pyacd.get_device_serial_number()
   }
   end_point=pyacd.api_root+"?"+urllib.urlencode(params)
   resp_json=json.loads(pyacd.do_get(end_point))
@@ -168,7 +168,7 @@ def get_upload_url_by_id(object_id,size,method="POST"):
   if not session.is_logged_in():
     raise pyacd.PyAmazonCloudDriveError("Not logined %s"%session)
 
-  if not session.touValidate:
+  if not session.agreed_with_terms:
     raise pyacd.PyAmazonCloudDriveError("You need to agree with license terms at web page: https://%s/clouddrive"%pyacd.amazon_domain)
 
   operation="getUploadUrlById"

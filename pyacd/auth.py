@@ -27,6 +27,20 @@ import urllib, cookielib
 import pyacd
 
 def login(email=None,password=None,session=None):
+  """Login either with email and password or session.
+
+  :type email: string
+  :param email: email address registered to Amazon
+
+  :type password: string
+  :param password: password
+
+  :type session: pyacd.session.Session
+  :param session: previous session
+
+  :rtype: :class:`pyacd.session.Session`
+  :return: Inclues cookies, username and customer_id.
+  """
   if session:
     pyacd.session=Session(session)
   elif email is None or password is None:
@@ -89,7 +103,7 @@ def login(email=None,password=None,session=None):
     pyacd.session.username=username
 
     if re.search(r"ADrive\.touValidate = true;",html):
-      pyacd.session.touValidate = True
+      pyacd.session.agreed_with_terms = True
   except:
     pass
 
@@ -101,7 +115,7 @@ class Session(object):
   def __init__(self,session=None):
     self.username=None
     self.customer_id=None
-    self.touValidate = False;
+    self.agreed_with_terms = False;
     pyacd.session=self
     if session:
       self.cookies = session.cookies
@@ -126,10 +140,10 @@ class Session(object):
     fp.close()
 
   def __repr__(self):
-    return '<Session: username: %s, customer_id: %s, touValidate: %s>' % (self.username, self.customer_id, self.touValidate)
+    return '<Session: username: %s, customer_id: %s, agreed_with_terms: %s>' % (self.username, self.customer_id, self.agreed_with_terms)
 
   def __str__(self):
-    return '<Session: username: %s, customer_id: %s, touValidate: %s>' % (self.username, self.customer_id, self.touValidate)
+    return '<Session: username: %s, customer_id: %s, agreed_with_terms: %s>' % (self.username, self.customer_id, self.agreed_with_terms)
 
   def is_logged_in(self):
     return (self.username and self.customer_id)
